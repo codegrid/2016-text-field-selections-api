@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Markdownのリストの入力補完</title>
+  <style>
+    textarea {
+      max-width: 100%;
+    }
+    textarea, input {
+      font-size: inherit;
+    }
+  </style>
+</head>
+<body>
+  <textarea id="textarea" cols="30" rows="10">- hoge
+
+* fuga
+
+1. one
+2. two</textarea>
+</body>
+<script>
+  var textarea = document.getElementById('textarea');
+  var isCompositionEvent = false;
+  var keyDownCode;
+
+  textarea.addEventListener('compositionend', _onCompositionend);
+  textarea.addEventListener('keydown', _onKeydown);
+  textarea.addEventListener('keyup', _onKeyup);
+
+  // 日本語IME確定時のEnterかどうかを判定するために、compositionendイベントを監視
+  function _onCompositionend(event) {
+    isCompositionEvent = true;
+  }
+
+  // 日本語IME確定時のEnterかどうか判定するために、keydownのkeyCodeを取得
+  function _onKeydown(event) {
+    keydownCode = event.keyCode;
+    isCompositionEvent = false;
+  }
+
+  function _onKeyup(event) {
+    // 改行のEnterキー（!日本語IMEでの確定）が押された場合のみ処理を行う
+    if (event.keyCode !== 13 || keydownCode !== 13 || isCompositionEvent) return;
+
+    var value       = textarea.value;
+    var values      = value.split('\n');
+    var caret       = textarea.selectionStart;
+    var currentLine = _getCurrentLine(values, caret);
+    var listMark    = _getListMark(values, currentLine);
+
+    // リスト記号を補完
+    if (listMark) {
+      values[currentLine + 1] = listMark + values[currentLine + 1];
+    }
+
+    // テキストエリアに補完済み文字列を反映
+    textarea.value = values.join('\n');
+
+    // 補完したリスト記号の右側にカーソルを移動
+    if (listMark) {
+      var newCaret = caret + listMark.length;
+      textarea.setSelectionRange(newCaret, newCaret);
+    }
+  }
+
+  // カーソルのある行番号を取得
+  function _getCurrentLine(values, caret) {
+    var length      = 0;
+    var currentLine = 0;
+
+    values.some(function (value, index) {
+      length += value.length + 1;
+      currentLine = index;
+      return (length >= caret);
+    });
+
+    return currentLine;
+  }
+
+  // 行頭のリスト記号を取得
+  function _getListMark(values, currentLine) {
+    var matched = values[currentLine].match(/^(\s*(?:-|\*|\d+\.)\s)/);
+
+    if (!matched) return null;
+
+    return matched[0];
+  }
+</script>
+</html>

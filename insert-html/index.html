@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>選択文字列をHTMLタグで囲む</title>
+  <style>
+    textarea {
+      max-width: 100%;
+    }
+    textarea, input {
+      font-size: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <textarea id="textarea" cols="30" rows="5">The quick, brown fox jumps over a lazy dog.</textarea>
+  </div>
+  <div>
+    <input class="button" type="button" data-tag-name="b" value="太字">
+    <input class="button" type="button" data-tag-name="i" value="斜体">
+  </div>
+</body>
+<script>
+  var textarea = document.getElementById('textarea');
+  var buttons  = document.getElementsByClassName('button');
+
+  for (var i = 0, l = buttons.length; i < l; i++) {
+    buttons[i].addEventListener('click', function (event) {
+      var tagName = this.getAttribute('data-tag-name');
+      var start   = textarea.selectionStart;
+      var end     = textarea.selectionEnd;
+      var value   = textarea.value;
+      var length  = textarea.value.length;
+
+      textarea.value =
+        value.substring(0, start)
+        + '<' + tagName + '>'
+        + value.substring(start, end)
+        + '</' + tagName + '>'
+        + value.substring(end, length);
+
+      textarea.setSelectionRange(0, 0); // for Edge
+    });
+  }
+</script>
+</html>
