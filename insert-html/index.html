@@ -23,8 +23,8 @@
   </div>
 </body>
 <script>
-  var textarea = document.getElementById('textarea');
-  var buttons  = document.getElementsByClassName('button');
+  var textarea = document.querySelector('#textarea');
+  var buttons  = document.querySelectorAll('.button');
 
   for (var i = 0, l = buttons.length; i < l; i++) {
     buttons[i].addEventListener('click', function (event) {
